@@ -66,7 +66,7 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
           className="min-h-[420px] flex-1 overflow-y-auto pr-1"
         >
           <div className="flex h-full items-center justify-center text-center text-sm text-purple-100/70">
-            Start the conversation with a vibe check or upload to unlock personalized playlists.
+            Start the conversation with an image upload to unlock personalized playlists.
           </div>
         </div>
 

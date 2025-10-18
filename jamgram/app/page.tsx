@@ -7,7 +7,7 @@ export default function Home() {
       <section className="rounded-lg border border-purple-400/30 bg-purple-900/20 p-6 shadow-[0_0_15px_#8b5cf6]/20">
         <ImageUpload />
       </section>
-      <ChatPanel isConnected={false} />
+        <ChatPanel isConnected={false} />
     </div>
   );
 }
