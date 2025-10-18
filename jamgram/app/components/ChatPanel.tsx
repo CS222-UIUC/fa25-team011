@@ -21,6 +21,8 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
   };
 
   useEffect(() => {
+    // Whenever the value changes (typing or clearing), recompute the height so the
+    // textarea grows or shrinks to hug the content without showing scrollbars.
     adjustTextareaHeight();
   }, [inputValue]);
 
@@ -28,6 +30,7 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
+    // Clear the field immediately so the UI feels responsive before awaiting backend work.
     setInputValue("");
     adjustTextareaHeight();
 
@@ -41,12 +44,14 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    // Treat Enter as submit by default, unless the user holds Shift to request a newline.
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       void handleSend();
     }
   };
 
+  // Disable the send button (and keyboard submit) when the field only has whitespace.
   const sendDisabled = useMemo(() => inputValue.trim().length === 0, [inputValue]);
 
   return (
