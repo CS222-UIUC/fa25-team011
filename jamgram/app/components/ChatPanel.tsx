@@ -3,16 +3,29 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
 export type ChatPanelProps = {
-  onSend?: (message: string) => Promise<void> | void;
+  onSend?: (message: string) => Promise<string | void> | void; // now can return a response string
   isConnected?: boolean;
 };
 
-export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps) {
-  // BACKEND_HOOK: token/session check should happen before rendering via parent props.
-  const [inputValue, setInputValue] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
 
-  // Ensure the textarea height matches its content up to four rows (~160px).
+export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps) {
+  const [inputValue, setInputValue] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]); // 👈 store chat messages
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const chatLogRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll to the bottom whenever new messages are added
+  useEffect(() => {
+    chatLogRef.current?.scrollTo({
+      top: chatLogRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages]);
+
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -21,8 +34,6 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
   };
 
   useEffect(() => {
-    // Whenever the value changes (typing or clearing), recompute the height so the
-    // textarea grows or shrinks to hug the content without showing scrollbars.
     adjustTextareaHeight();
   }, [inputValue]);
 
@@ -30,28 +41,29 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
-    // Clear the field immediately so the UI feels responsive before awaiting backend work.
+    // Display user message immediately
+    setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInputValue("");
     adjustTextareaHeight();
 
-    // BACKEND_HOOK: send message payload to API route (streaming later).
-    // BACKEND_HOOK: persist outbound message to DB (Vercel Postgres).
     try {
-      await onSend?.(trimmed);
+      // Optionally get assistant response
+      const response = await onSend?.(trimmed);
+      if (response) {
+        setMessages((prev) => [...prev, { role: "assistant", content: response }]);
+      }
     } catch (error) {
       console.error("Chat send error", error);
     }
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Treat Enter as submit by default, unless the user holds Shift to request a newline.
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       void handleSend();
     }
   };
 
-  // Disable the send button (and keyboard submit) when the field only has whitespace.
   const sendDisabled = useMemo(() => inputValue.trim().length === 0, [inputValue]);
 
   return (
@@ -65,19 +77,40 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
 
       <div className="mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-purple-600/20 p-6 sm:p-8 lg:p-10 shadow-[0_10px_60px_-10px_rgba(168,85,247,0.35)] backdrop-blur-md">
         <div
+          ref={chatLogRef}
           role="log"
           aria-live="polite"
           aria-relevant="additions"
-          className="min-h-[420px] flex-1 overflow-y-auto pr-1"
+          className="min-h-[420px] flex-1 overflow-y-auto pr-1 space-y-4"
         >
-          <div className="flex h-full items-center justify-center text-center text-sm text-purple-100/70">
-            Start the conversation with an image upload to unlock personalized playlists.
-          </div>
+          {messages.length === 0 ? (
+            <div className="flex h-full items-center justify-center text-center text-sm text-purple-100/70">
+              Start the conversation with an image upload to unlock personalized playlists.
+            </div>
+          ) : (
+            messages.map((m, i) => (
+              <div
+                key={i}
+                className={`flex ${
+                  m.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
+                    m.role === "user"
+                      ? "bg-purple-500 text-white"
+                      : "bg-white/10 text-purple-100"
+                  }`}
+                >
+                  {m.content}
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="mt-6 flex flex-col gap-2">
           {!isConnected && (
-            // BACKEND_HOOK: toggle isConnected from Spotify OAuth state.
             <p className="text-xs text-purple-100/70">
               Connect Spotify to personalize recommendations.
             </p>
