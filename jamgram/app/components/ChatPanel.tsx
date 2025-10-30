@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
 export type ChatPanelProps = {
-  onSend?: (message: string) => Promise<string | void> | void; // now can return a response string
+  onSend?: (message: string, context?: { imageId?: string; currentSongId?: string }) => Promise<string | void> | void;
   isConnected?: boolean;
+  imageId?: string;        //add image reference
+  currentSongId?: string;  //add current recommended song reference
 };
 
 type Message = {
@@ -12,13 +14,18 @@ type Message = {
   content: string;
 };
 
-export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps) {
+export default function ChatPanel({
+  onSend,
+  isConnected = true,
+  imageId,
+  currentSongId,
+}: ChatPanelProps) {
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]); // 👈 store chat messages
+  const [messages, setMessages] = useState<Message[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const chatLogRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll to the bottom whenever new messages are added
+  // auto-scroll to latest
   useEffect(() => {
     chatLogRef.current?.scrollTo({
       top: chatLogRef.current.scrollHeight,
@@ -41,14 +48,14 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
-    // Display user message immediately
+    // show user message immediately
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInputValue("");
     adjustTextareaHeight();
 
     try {
-      // Optionally get assistant response
-      const response = await onSend?.(trimmed);
+      // send both text and context (image + current song)
+      const response = await onSend?.(trimmed, { imageId, currentSongId });
       if (response) {
         setMessages((prev) => [...prev, { role: "assistant", content: response }]);
       }
@@ -91,9 +98,7 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
             messages.map((m, i) => (
               <div
                 key={i}
-                className={`flex ${
-                  m.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
