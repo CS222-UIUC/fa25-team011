@@ -1,33 +1,34 @@
+// app/tests/page.test.tsx
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Home from '../page'
 
+// Mock the components since they're tested separately
+jest.mock('../components/ImageUpload', () => {
+  return function MockImageUpload() {
+    return <div data-testid="image-upload">ImageUpload Component</div>
+  }
+})
+
+jest.mock('../components/ChatPanel', () => {
+  return function MockChatPanel() {
+    return <div data-testid="chat-panel">ChatPanel Component</div>
+  }
+})
+
 describe('Home Page', () => {
-  it('renders the image upload section', () => {
+  it('renders both main sections', () => {
     render(<Home />)
     
-    const imageUploadHeading = screen.getByText('Image Upload')
-    expect(imageUploadHeading).toBeInTheDocument()
+    expect(screen.getByTestId('image-upload')).toBeInTheDocument()
+    expect(screen.getByTestId('chat-panel')).toBeInTheDocument()
   })
 
-  it('renders the chat section', () => {
-    render(<Home />)
+  it('uses grid layout', () => {
+    const { container } = render(<Home />)
+    const gridContainer = container.querySelector('.grid')
     
-    const chatHeading = screen.getByText('Chat')
-    expect(chatHeading).toBeInTheDocument()
-  })
-
-  it('displays the image upload description', () => {
-    render(<Home />)
-    
-    const description = screen.getByText(/Add a picture to get the perfect track/i)
-    expect(description).toBeInTheDocument()
-  })
-
-  it('displays the chat description', () => {
-    render(<Home />)
-    
-    const description = screen.getByText(/Tailor and\/or tweak recommendations/i)
-    expect(description).toBeInTheDocument()
+    expect(gridContainer).toBeInTheDocument()
+    expect(gridContainer).toHaveClass('lg:grid-cols-2')
   })
 })
