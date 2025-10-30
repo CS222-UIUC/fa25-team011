@@ -37,8 +37,8 @@ export default function ImageUpload() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 rounded-2xl bg-[#cda8ff]/20 p-8 text-white shadow-[0_0_25px_#a855f7]/30 border border-[#e2c8ff]/30 backdrop-blur-md w-full max-w-md mx-auto">
-      <h2 className="text-2xl font-semibold">Upload Your Image</h2>
+    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-6 rounded-3xl border border-white/10 bg-[#cda8ff]/20 p-8 text-white shadow-[0_0_25px_#a855f7]/30 backdrop-blur-md">
+      <h2 className="text-2xl font-semibold text-white/90">Upload Your Image</h2>
       <p className="text-sm text-purple-100 text-center">
         Drag & drop an image here, or click to select one 📸
       </p>
@@ -47,7 +47,7 @@ export default function ImageUpload() {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`flex flex-col items-center justify-center w-full h-64 rounded-xl border-2 border-dashed transition ${
+        className={`flex h-64 w-full flex-col items-center justify-center rounded-3xl border border-dashed transition ${
           isDragging
             ? "border-purple-400 bg-purple-600/30"
             : "border-purple-300/40 bg-purple-500/20 hover:bg-purple-500/25"
@@ -57,7 +57,7 @@ export default function ImageUpload() {
           <>
             <label
               htmlFor="image-upload"
-              className="cursor-pointer rounded-md border border-purple-300/40 bg-purple-700/30 px-4 py-2 text-sm font-medium text-purple-100 shadow-[0_0_10px_#a855f7] transition hover:bg-purple-600/40 hover:shadow-[0_0_15px_#c084fc]"
+              className="cursor-pointer rounded-3xl border border-purple-300/40 bg-purple-700/30 px-4 py-2 text-sm font-medium text-purple-100 shadow-[0_0_10px_#a855f7] transition hover:bg-purple-600/40 hover:shadow-[0_0_15px_#c084fc]"
             >
               Select Image
             </label>
@@ -75,11 +75,11 @@ export default function ImageUpload() {
             <img
               src={previewUrl}
               alt="Preview"
-              className="max-h-48 rounded-lg shadow-lg border border-purple-400/30 object-contain"
+              className="max-h-48 rounded-3xl shadow-lg border border-purple-400/30 object-contain"
             />
             <button
               onClick={handleRemoveImage}
-              className="rounded-full border border-purple-300/40 bg-purple-700/30 px-4 py-2 text-sm font-medium text-purple-100 transition hover:bg-purple-600/40 hover:shadow-[0_0_10px_#c084fc]"
+              className="rounded-3xl border border-purple-300/40 bg-purple-700/30 px-4 py-2 text-sm font-medium text-purple-100 transition hover:bg-purple-600/40 hover:shadow-[0_0_10px_#c084fc]"
             >
               Remove Image
             </button>
