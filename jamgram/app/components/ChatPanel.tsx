@@ -57,13 +57,13 @@ export default function ChatPanel({ onSend, isConnected = true }: ChatPanelProps
   return (
     <div className="flex h-full flex-col">
       <header>
-        <h2 className="text-xl font-semibold text-white/90">Chat</h2>
+        <h2 className="text-2xl font-semibold text-white/90">Chat</h2>
         <p className="mt-1 text-sm text-purple-100/80">
           Tailor and/or tweak recommendations here.
         </p>
       </header>
 
-      <div className="mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl bg-purple-600/20 p-6 sm:p-8 lg:p-10 ring-1 ring-purple-200/20 shadow-[0_10px_60px_-10px_rgba(168,85,247,0.35)] backdrop-blur-md outline outline-1 -outline-offset-1 outline-white/5">
+      <div className="mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-purple-600/20 p-6 sm:p-8 lg:p-10 shadow-[0_10px_60px_-10px_rgba(168,85,247,0.35)] backdrop-blur-md">
         <div
           role="log"
           aria-live="polite"

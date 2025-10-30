@@ -37,8 +37,8 @@ export default function ImageUpload() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 rounded-2xl bg-[#cda8ff]/20 p-8 text-white shadow-[0_0_25px_#a855f7]/30 border border-[#e2c8ff]/30 backdrop-blur-md w-full max-w-md mx-auto">
-      <h2 className="text-2xl font-semibold">Upload Your Image</h2>
+    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-6 rounded-2xl border border-white/10 bg-[#cda8ff]/20 p-8 text-white shadow-[0_0_25px_#a855f7]/30 backdrop-blur-md">
+      <h2 className="text-2xl font-semibold text-white/90">Upload Your Image</h2>
       <p className="text-sm text-purple-100 text-center">
         Drag & drop an image here, or click to select one 📸
       </p>
@@ -47,7 +47,7 @@ export default function ImageUpload() {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`flex flex-col items-center justify-center w-full h-64 rounded-xl border-2 border-dashed transition ${
+        className={`flex h-64 w-full flex-col items-center justify-center rounded-xl border border-dashed transition ${
           isDragging
             ? "border-purple-400 bg-purple-600/30"
             : "border-purple-300/40 bg-purple-500/20 hover:bg-purple-500/25"
