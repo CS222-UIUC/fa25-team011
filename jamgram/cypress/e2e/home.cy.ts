@@ -43,7 +43,7 @@ describe('Home Page', () => {
 
 
     it('shows accepted file types', () => {
-      cy.contains('PNG, JPG, JPEG').should('be.visible')
+      cy.contains('PNG, JPG, JPEG, HEIC').should('be.visible')
     })
 
 
