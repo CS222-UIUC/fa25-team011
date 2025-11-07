@@ -29,12 +29,12 @@ describe('ImageUpload Component', () => {
     
     const file = new File(['test'], 'test.png', { type: 'image/png' })
     const input = screen.getByLabelText('Select Image') as HTMLInputElement
-
+    
     // Mock URL.createObjectURL
     global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
-
+    
     fireEvent.change(input, { target: { files: [file] } })
-
+    
     expect(screen.getByAltText('Preview')).toBeInTheDocument()
     expect(screen.getByText('Remove Image')).toBeInTheDocument()
   })
@@ -44,7 +44,7 @@ describe('ImageUpload Component', () => {
     
     const file = new File(['test'], 'test.png', { type: 'image/png' })
     const input = screen.getByLabelText('Select Image') as HTMLInputElement
-
+    
     global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
     
     // Upload image
