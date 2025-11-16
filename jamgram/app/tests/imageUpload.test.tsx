@@ -4,6 +4,11 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import ImageUpload from "../components/ImageUpload"
 
 describe('ImageUpload Component', () => {
+  beforeEach(() => {
+    global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
+    global.URL.revokeObjectURL = jest.fn()
+  })
+
   it('renders the upload section', () => {
     render(<ImageUpload />)
     expect(screen.getByText('Upload Your Image')).toBeInTheDocument()
@@ -21,7 +26,7 @@ describe('ImageUpload Component', () => {
 
   it('displays accepted file types', () => {
     render(<ImageUpload />)
-    expect(screen.getByText('PNG, JPG, JPEG')).toBeInTheDocument()
+    expect(screen.getByText('PNG, JPG, JPEG, HEIC')).toBeInTheDocument()
   })
 
   it('handles file selection and shows preview', () => {
@@ -29,10 +34,7 @@ describe('ImageUpload Component', () => {
     
     const file = new File(['test'], 'test.png', { type: 'image/png' })
     const input = screen.getByLabelText('Select Image') as HTMLInputElement
-    
-    // Mock URL.createObjectURL
-    global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
-    
+
     fireEvent.change(input, { target: { files: [file] } })
     
     expect(screen.getByAltText('Preview')).toBeInTheDocument()
@@ -41,12 +43,10 @@ describe('ImageUpload Component', () => {
 
   it('removes image when remove button is clicked', () => {
     render(<ImageUpload />)
-    
+
     const file = new File(['test'], 'test.png', { type: 'image/png' })
     const input = screen.getByLabelText('Select Image') as HTMLInputElement
-    
-    global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
-    
+
     // Upload image
     fireEvent.change(input, { target: { files: [file] } })
     expect(screen.getByAltText('Preview')).toBeInTheDocument()

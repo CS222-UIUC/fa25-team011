@@ -43,7 +43,7 @@ describe('Home Page', () => {
 
 
     it('shows accepted file types', () => {
-      cy.contains('PNG, JPG, JPEG').should('be.visible')
+      cy.contains('PNG, JPG, JPEG, HEIC').should('be.visible')
     })
 
 
@@ -70,7 +70,9 @@ describe('Home Page', () => {
 
 
     it('displays empty state message', () => {
-      cy.contains('Start the conversation with an image upload').should('be.visible')
+      cy.contains('Start the conversation with an image upload to unlock personalized playlists').should(
+        'be.visible'
+      )
     })
 
 
