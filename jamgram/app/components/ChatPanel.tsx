@@ -1,17 +1,29 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import RecommendedSongCard from "./RecommendedSongCard"; // import the component
 
 export type ChatPanelProps = {
-  onSend?: (message: string, context?: { imageId?: string; currentSongId?: string }) => Promise<string | void> | void;
+  onSend?: (
+    message: string,
+    context?: { imageId?: string; currentSongId?: string }
+  ) => Promise<string | void> | void;
   isConnected?: boolean;
-  imageId?: string;        //add image reference
-  currentSongId?: string;  //add current recommended song reference
+  imageId?: string;
+  currentSongId?: string; // add current recommended song reference
 };
 
 type Message = {
   role: "user" | "assistant";
   content: string;
+};
+
+export type Song = {
+  id: string;
+  title: string;
+  artist: string;
+  albumImage: string;
+  previewUrl?: string;
 };
 
 export default function ChatPanel({
@@ -22,6 +34,7 @@ export default function ChatPanel({
 }: ChatPanelProps) {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const chatLogRef = useRef<HTMLDivElement | null>(null);
 
@@ -31,7 +44,7 @@ export default function ChatPanel({
       top: chatLogRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages]);
+  }, [messages, currentSong]);
 
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
@@ -44,17 +57,33 @@ export default function ChatPanel({
     adjustTextareaHeight();
   }, [inputValue]);
 
+  // Whenever currentSongId updates, fetch song details (example hardcoded for now)
+  useEffect(() => {
+    if (!currentSongId) {
+      setCurrentSong(null);
+      return;
+    }
+
+    // TODO: Replace with Spotify API fetch
+    const song: Song = {
+      id: currentSongId,
+      title: "Sample Song",
+      artist: "Sample Artist",
+      albumImage: "/sample-album.jpg",
+      previewUrl: "https://p.scdn.co/mp3-preview/sample.mp3",
+    };
+    setCurrentSong(song);
+  }, [currentSongId]);
+
   const handleSend = async () => {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
-    // show user message immediately
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInputValue("");
     adjustTextareaHeight();
 
     try {
-      // send both text and context (image + current song)
       const response = await onSend?.(trimmed, { imageId, currentSongId });
       if (response) {
         setMessages((prev) => [...prev, { role: "assistant", content: response }]);
@@ -90,27 +119,40 @@ export default function ChatPanel({
           aria-relevant="additions"
           className="min-h-[420px] flex-1 overflow-y-auto pr-1 space-y-4"
         >
-          {messages.length === 0 ? (
+          {messages.length === 0 && !currentSong ? (
             <div className="flex h-full items-center justify-center text-center text-sm text-purple-100/70">
               Start the conversation with an image upload to unlock personalized playlists.
             </div>
           ) : (
-            messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-              >
+            <>
+              {messages.map((m, i) => (
                 <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
-                    m.role === "user"
-                      ? "bg-purple-500 text-white"
-                      : "bg-white/10 text-purple-100"
-                  }`}
+                  key={i}
+                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  {m.content}
+                  <div
+                    className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
+                      m.role === "user"
+                        ? "bg-purple-500 text-white"
+                        : "bg-white/10 text-purple-100"
+                    }`}
+                  >
+                    {m.content}
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+
+              {currentSong && (
+                <div className="mt-4">
+                  <RecommendedSongCard
+                    title={currentSong.title}
+                    artist={currentSong.artist}
+                    albumImage={currentSong.albumImage}
+                    previewUrl={currentSong.previewUrl}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
 
