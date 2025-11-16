@@ -4,6 +4,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import ChatPanel from '../components/ChatPanel'
 
 describe('ChatPanel Component', () => {
+  beforeAll(() => {
+    window.HTMLElement.prototype.scrollTo = jest.fn()
+  })
+
   it('renders the chat header', () => {
     render(<ChatPanel />)
     expect(screen.getByText('Chat')).toBeInTheDocument()
@@ -11,12 +15,16 @@ describe('ChatPanel Component', () => {
 
   it('displays the instruction text', () => {
     render(<ChatPanel />)
-    expect(screen.getByText(/Tailor and\/or tweak recommendations/i)).toBeInTheDocument()
+    expect(screen.getByText(/Tailor and\/or tweak recommendations here/i)).toBeInTheDocument()
   })
 
   it('shows empty state message', () => {
     render(<ChatPanel />)
-    expect(screen.getByText(/Start the conversation with an image upload/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /Start the conversation with an image upload to unlock personalized playlists/i
+      )
+    ).toBeInTheDocument()
   })
 
   it('displays spotify connection notice when not connected', () => {
@@ -76,26 +84,32 @@ describe('ChatPanel Component', () => {
     
     const textarea = screen.getByPlaceholderText('Type a message…')
     const sendButton = screen.getByLabelText('Send message')
-    
+
     fireEvent.change(textarea, { target: { value: 'Test message' } })
     fireEvent.click(sendButton)
-    
+
     await waitFor(() => {
-      expect(mockOnSend).toHaveBeenCalledWith('Test message')
+      expect(mockOnSend).toHaveBeenCalledWith('Test message', {
+        currentSongId: undefined,
+        imageId: undefined,
+      })
     })
   })
 
   it('sends message on Enter key press', async () => {
     const mockOnSend = jest.fn()
     render(<ChatPanel onSend={mockOnSend} />)
-    
+
     const textarea = screen.getByPlaceholderText('Type a message…')
-    
+
     fireEvent.change(textarea, { target: { value: 'Test message' } })
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false })
-    
+
     await waitFor(() => {
-      expect(mockOnSend).toHaveBeenCalledWith('Test message')
+      expect(mockOnSend).toHaveBeenCalledWith('Test message', {
+        currentSongId: undefined,
+        imageId: undefined,
+      })
     })
   })
 
