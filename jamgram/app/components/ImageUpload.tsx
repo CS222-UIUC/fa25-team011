@@ -1,12 +1,19 @@
 "use client";
+
 import { useState, DragEvent, ChangeEvent } from "react";
+// Added: import extractTags util
+import { extractTags } from "../utils/extractTags"; 
 
 export default function ImageUpload() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
+  // Added: state for analyzing/loading
+  const [isAnalyzing, setIsAnalyzing] = useState(false); 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Added: state to store extracted tags/colors/mood
+  const [tagsData, setTagsData] = useState<any>(null); 
 
   const revokePreviewUrl = () => {
     setPreviewUrl((current) => {
@@ -71,24 +78,42 @@ export default function ImageUpload() {
   const handleFileUpload = async (file: File) => {
     setSelectedImage(file);
     setErrorMessage(null);
+    // Reset previous tags when new file uploaded
+    setTagsData(null); 
+
+    let fileToSend: File = file; // Added: to handle HEIC converted file
 
     if (isHeicFile(file)) {
       setIsConverting(true);
       try {
         const previewBlob = await convertHeicToJpeg(file);
         updatePreviewUrl(previewBlob);
+
+        // Use converted blob as File to send to backend
+        fileToSend = new File([previewBlob], file.name, { type: "image/jpeg" }); 
       } catch (conversionError) {
         console.error("Failed to convert HEIC image", conversionError);
         setSelectedImage(null);
         revokePreviewUrl();
         setErrorMessage("We couldn't convert your HEIC image. Please try another file.");
+        return;
       } finally {
         setIsConverting(false);
       }
-      return;
+    } else {
+      updatePreviewUrl(file);
     }
 
-    updatePreviewUrl(file);
+    // Added: call backend to extract tags/colors/mood
+    try {
+      setIsAnalyzing(true);
+      const tags = await extractTags(fileToSend);
+      setTagsData(tags);
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to analyze image");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +141,8 @@ export default function ImageUpload() {
     revokePreviewUrl();
     setErrorMessage(null);
     setIsConverting(false);
+    // Clear extracted tags when removing image
+    setTagsData(null); 
   };
 
   return (
@@ -170,6 +197,19 @@ export default function ImageUpload() {
           </div>
         )}
       </div>
+
+      {/* Added: show analyzing/loading state */}
+      {isAnalyzing && <p className="text-sm text-purple-100">Analyzing image…</p>}
+
+      {/* Added: show extracted tags/colors/mood */}
+      {tagsData && (
+        <div className="mt-4 p-4 rounded-xl bg-purple-800/30 text-white text-left w-full">
+          <p><strong>Objects:</strong> {tagsData.objects?.join(", ") || "None"}</p>
+          <p><strong>Colors:</strong> {tagsData.colors?.join(", ") || "None"}</p>
+          <p><strong>Mood:</strong> {tagsData.mood || "Unknown"}</p>
+        </div>
+      )}
+
       {errorMessage && (
         <p className="text-sm text-red-200" role="alert">
           {errorMessage}
