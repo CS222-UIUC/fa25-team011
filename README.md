@@ -109,3 +109,9 @@ HF_TOKEN=your_huggingface_token
 - HEIC uploads rely on browser support for `createImageBitmap` (Safari). Non-supporting browsers will show a friendly error after attempting conversion.【F:jamgram/app/components/ImageUpload.tsx†L22-L72】
 - The chat panel currently uses placeholder song data until wired to backend recommendations; it still displays the latest suggested track with album art and optional preview audio.【F:jamgram/app/components/ChatPanel.tsx†L24-L78】【F:jamgram/app/components/RecommendedSongCard.tsx†L9-L33】
 - Ensure the `HF_TOKEN` is valid; the vision and LLM endpoints use the Hugging Face router domain (`hf-inference`).【F:jamgram/app/api/extract-tags/route.js†L13-L31】
+
+## Developers
+- **Shivi Narang — Backend:** Leads server-side integrations, maintains AI tagging pipelines, ensuring reliable Hugging Face inference for object detection, captioning, and color/mood extraction. 
+- **Caroline Feng — Frontend:** Drives UI/UX for the home experience, wiring the App Router layout with responsive styling and user-friendly flows for upload and chat surfaces.
+- **Vittoria Gallina — Frontend:** Focuses on reusable visual components, such as the chat panel, recommended song cards, and stateful interactions that present AI outputs clearly.
+- **Taniya Agarwal — Backend:** Spotify auth/session flow and data analysis routes that combine OpenAI prompts with user listening history.
