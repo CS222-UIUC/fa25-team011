@@ -152,6 +152,11 @@ export default function ImageUpload() {
         Drag & drop an image here, or click to select one 📸
       </p>
 
+      {/* HEIC Disclaimer */}
+      <p className="text-xs text-purple-200/70 italic -mt-2">
+        Note: HEIC image uploads only work on Safari.
+      </p>
+
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
