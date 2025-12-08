@@ -6,6 +6,7 @@ For more details, view the full project proposal [here](https://docs.google.com/
 
 ## Table of Contents
 - [Developers](#developers)
+- [Technical Architecture](#technical-architecture)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
@@ -22,6 +23,12 @@ For more details, view the full project proposal [here](https://docs.google.com/
 - **Caroline Feng — Frontend:** Drives UI/UX for the home experience, wiring the App Router layout with responsive styling and user-friendly flows for upload and chat surfaces.
 - **Vittoria Gallina — Frontend:** Focuses on reusable visual components, such as the chat panel, recommended song cards, and stateful interactions that present AI outputs clearly.
 - **Taniya Agarwal — Backend:** Spotify auth/session flow and data analysis routes that combine OpenAI prompts with user listening history.
+
+## Technical Architecture
+- **User input pipeline** – The upload form accepts drag-and-dropped images, creates previews, and falls back gracefully when HEIC conversion is unsupported. The file is sent to `/api/extract-tags` for processing via client helpers.
+- **Spotify session + data ingestion** – Users authenticate with Spotify through NextAuth; authorized requests to `/api/spotify/recently-played` and `/api/spotify/top-artists` proxy the Spotify Web API using the stored access token and return normalized track/artist data for downstream prompts.
+- **LLM orchestration** – The `/api/spotify/analyze` route combines extracted image features and Spotify listening history, crafts a structured prompt, and calls OpenAI to generate music recommendations aligned to the photo’s mood.
+- **Presentation layer** – The chat panel renders the generated suggestions, album art, and optional preview audio clips, while retaining the latest recommendation payload for the conversation view.
 
 ## Features
 - **Image uploads with HEIC support** – Drag-and-drop or select images (including Safari HEIC files) with automatic preview generation and conversion when possible.\
