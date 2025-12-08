@@ -2,7 +2,10 @@
 
 JamGram is a Next.js application that pairs photo analysis with Spotify data to recommend music that matches the mood of your images. Upload a picture, see AI-extracted tags and colors, and chat about tailored song suggestions that blend your visual vibe with your listening history.
 
+For more details, view the full project proposal [here](https://docs.google.com/document/d/1RL4AwoUuZwGni3cGQA3tgS-AmTcSKMTdFVit1KK_uWU/edit?usp=sharing).
+
 ## Table of Contents
+- [Developers](#developers)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
@@ -14,13 +17,19 @@ JamGram is a Next.js application that pairs photo analysis with Spotify data to 
 - [API Overview](#api-overview)
 - [Notes](#notes)
 
+## Developers
+- **Shivi Narang — Backend:** Leads server-side integrations, maintains AI tagging pipelines, ensuring reliable Hugging Face inference for object detection, captioning, and color/mood extraction. 
+- **Caroline Feng — Frontend:** Drives UI/UX for the home experience, wiring the App Router layout with responsive styling and user-friendly flows for upload and chat surfaces.
+- **Vittoria Gallina — Frontend:** Focuses on reusable visual components, such as the chat panel, recommended song cards, and stateful interactions that present AI outputs clearly.
+- **Taniya Agarwal — Backend:** Spotify auth/session flow and data analysis routes that combine OpenAI prompts with user listening history.
+
 ## Features
 - **Image uploads with HEIC support** – Drag-and-drop or select images (including Safari HEIC files) with automatic preview generation and conversion when possible.\
-  Displays detected objects, dominant colors, and inferred mood after AI analysis.【F:jamgram/app/components/ImageUpload.tsx†L1-L197】【F:jamgram/app/components/ImageUpload.tsx†L197-L220】
-- **AI-powered image tagging** – The `/api/extract-tags` route calls Hugging Face vision models to classify objects, caption the photo, and infer colors/mood, returning structured JSON for the UI.【F:jamgram/app/api/extract-tags/route.js†L1-L205】【F:jamgram/app/api/extract-tags/route.js†L205-L278】
-- **Recommendation chat panel** – Converse about the uploaded image and preview recommended tracks, including album art and optional audio snippets for quick listening.【F:jamgram/app/components/ChatPanel.tsx†L1-L175】【F:jamgram/app/components/RecommendedSongCard.tsx†L1-L36】
-- **Spotify-authenticated experiences** – Sign in with Spotify via NextAuth to access listening data, analyze top artists and recent plays, and feed them into OpenAI for recommendation prompts.【F:jamgram/app/api/auth/[...nextauth]/route.js†L1-L38】【F:jamgram/app/api/spotify/analyze/route.js†L1-L56】
-- **Modern UI** – Built with the Next.js App Router, Tailwind CSS styling, and responsive layouts so the uploader and chat fit side-by-side on large screens.【F:jamgram/app/page.tsx†L1-L10】【F:jamgram/tailwind.config.ts†L1-L12】
+  Displays detected objects, dominant colors, and inferred mood after AI analysis.
+- **AI-powered image tagging** – The `/api/extract-tags` route calls Hugging Face vision models to classify objects, caption the photo, and infer colors/mood, returning structured JSON for the UI.
+- **Recommendation chat panel** – Converse about the uploaded image and preview recommended tracks, including album art and optional audio snippets for quick listening.
+- **Spotify-authenticated experiences** – Sign in with Spotify via NextAuth to access listening data, analyze top artists and recent plays, and feed them into OpenAI for recommendation prompts.
+- **Modern UI** – Built with the Next.js App Router, Tailwind CSS styling, and responsive layouts so the uploader and chat fit side-by-side on large screens. 
 
 ## Tech Stack
 - **Framework:** Next.js 15 (App Router) with React 19
@@ -101,17 +110,11 @@ HF_TOKEN=your_huggingface_token
 ```
 
 ## API Overview
-- `POST /api/extract-tags` – Accepts form-data `image` file. Uses Hugging Face models to return detected objects, colors, and mood for the image.【F:jamgram/app/api/extract-tags/route.js†L1-L205】
-- `GET /api/spotify/analyze` – Requires Spotify-authenticated session. Fetches top artists and recent plays, then calls OpenAI to produce song recommendations informed by image features.【F:jamgram/app/api/spotify/analyze/route.js†L1-L56】
-- `GET /api/spotify/recently-played` / `GET /api/spotify/top-artists` – Proxy routes to Spotify Web API for the signed-in user. 【F:jamgram/app/api/spotify/recently-played.js†L1-L49】【F:jamgram/app/api/spotify/top-artists.js†L1-L49】
+- `POST /api/extract-tags` – Accepts form-data `image` file. Uses Hugging Face models to return detected objects, colors, and mood for the image.
+- `GET /api/spotify/analyze` – Requires Spotify-authenticated session. Fetches top artists and recent plays, then calls OpenAI to produce song recommendations informed by image features.
+- `GET /api/spotify/recently-played` / `GET /api/spotify/top-artists` – Proxy routes to Spotify Web API for the signed-in user. 
 
 ## Notes
-- HEIC uploads rely on browser support for `createImageBitmap` (Safari). Non-supporting browsers will show a friendly error after attempting conversion.【F:jamgram/app/components/ImageUpload.tsx†L22-L72】
-- The chat panel currently uses placeholder song data until wired to backend recommendations; it still displays the latest suggested track with album art and optional preview audio.【F:jamgram/app/components/ChatPanel.tsx†L24-L78】【F:jamgram/app/components/RecommendedSongCard.tsx†L9-L33】
-- Ensure the `HF_TOKEN` is valid; the vision and LLM endpoints use the Hugging Face router domain (`hf-inference`).【F:jamgram/app/api/extract-tags/route.js†L13-L31】
-
-## Developers
-- **Shivi Narang — Backend:** Leads server-side integrations, maintains AI tagging pipelines, ensuring reliable Hugging Face inference for object detection, captioning, and color/mood extraction. 
-- **Caroline Feng — Frontend:** Drives UI/UX for the home experience, wiring the App Router layout with responsive styling and user-friendly flows for upload and chat surfaces.
-- **Vittoria Gallina — Frontend:** Focuses on reusable visual components, such as the chat panel, recommended song cards, and stateful interactions that present AI outputs clearly.
-- **Taniya Agarwal — Backend:** Spotify auth/session flow and data analysis routes that combine OpenAI prompts with user listening history.
+- HEIC uploads rely on browser support for `createImageBitmap` (Safari). Non-supporting browsers will show a friendly error after attempting conversion.
+- The chat panel currently uses placeholder song data until wired to backend recommendations; it still displays the latest suggested track with album art and optional preview audio.
+- Ensure the `HF_TOKEN` is valid; the vision and LLM endpoints use the Hugging Face router domain (`hf-inference`).
