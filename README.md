@@ -25,10 +25,11 @@ For more details, view the full project proposal [here](https://docs.google.com/
 - **Taniya Agarwal — Backend:** Spotify auth/session flow and data analysis routes that combine OpenAI prompts with user listening history.
 
 ## Technical Architecture
-- **User input pipeline** – The upload form accepts drag-and-dropped images, creates previews, and falls back gracefully when HEIC conversion is unsupported. The file is sent to `/api/extract-tags` for processing via client helpers.
-- **Spotify session + data ingestion** – Users authenticate with Spotify through NextAuth; authorized requests to `/api/spotify/recently-played` and `/api/spotify/top-artists` proxy the Spotify Web API using the stored access token and return normalized track/artist data for downstream prompts.
-- **LLM orchestration** – The `/api/spotify/analyze` route combines extracted image features and Spotify listening history, crafts a structured prompt, and calls Grok to generate music recommendations aligned to the photo’s mood.
-- **Presentation layer** – The chat panel renders the generated suggestions, album art, and optional preview audio clips, while retaining the latest recommendation payload for the conversation view.
+- **User input pipeline** – Drag-and-drop uploads (including HEIC detection and browser-side conversion where possible) create previews, then send the file to `/api/extract-tags` for AI processing.
+- **Vision + mood extraction** – `/api/extract-tags` calls Hugging Face for image classification, captioning, and a small LLM pass to infer dominant colors and mood. Partial results are returned even when a model is loading.
+- **Spotify session + data ingestion** – Users authenticate with Spotify via NextAuth; authenticated requests to `/api/spotify/recently-played` and `/api/spotify/top-artists` proxy the Spotify Web API to surface listening context.
+- **LLM orchestration** – The `/api/generate-recommendations` route blends extracted image objects with Spotify history and (optionally) a user instruction, then calls Groq (Llama 3.1) to produce a 10-song list labeled with an overall mood line.
+- **Presentation layer** – The chat panel displays the Groq mood summary and song list while retaining the extracted objects for follow-up prompts; the header shows Connect/Sign Out controls tied to the NextAuth session.
 
 ## Features
 - **Image uploads with HEIC support** – Drag-and-drop or select images (including Safari HEIC files) with automatic preview generation and conversion when possible.\
@@ -42,7 +43,7 @@ For more details, view the full project proposal [here](https://docs.google.com/
 - **Framework:** Next.js 15 (App Router) with React 19
 - **Styling:** Tailwind CSS 4
 - **Authentication:** NextAuth.js with Spotify provider
-- **AI/ML:** Hugging Face Inference API for vision and LLM calls; OpenAI for playlist prompts
+- **AI/ML:** Hugging Face Inference API for vision and LLM calls + mood extraction; Groq Llama 3.1 chat completions for playlist generation
 - **Testing:** Jest + React Testing Library; Cypress for E2E
 
 ## Project Structure
@@ -50,7 +51,7 @@ For more details, view the full project proposal [here](https://docs.google.com/
 fa25-team011/
 └── jamgram/
     ├── app/
-    │   ├── api/                # Server routes (auth, spotify, image tagging)
+    │   ├── api/                # Server routes (auth, spotify, image tagging, Groq recommendations))
     │   ├── components/         # Client components (uploader, chat, cards)
     │   ├── utils/              # Client helpers (e.g., extractTags)
     │   ├── layout.tsx          # Root layout
@@ -63,7 +64,7 @@ fa25-team011/
 ## Prerequisites
 - Node.js 18.18+ (Node 20 recommended)
 - npm 9+
-- Access tokens for Spotify, OpenAI, and Hugging Face (see below)
+- Access tokens for Spotify, Hugging Face, Groq
 
 ## Setup
 1. Install dependencies:
@@ -109,19 +110,20 @@ NEXTAUTH_URL=http://localhost:3000
 SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 
-# OpenAI (used by Spotify analysis route)
-OPENAI_API_KEY=your_openai_api_key
-
 # Hugging Face (used by /api/extract-tags)
 HF_TOKEN=your_huggingface_token
+
+# Groq (used by /api/generate-recommendations)
+GROK_KEY=your_groq_api_key
+GROK_MODEL=llama-3.1-8b-instant
 ```
 
 ## API Overview
 - `POST /api/extract-tags` – Accepts form-data `image` file. Uses Hugging Face models to return detected objects, colors, and mood for the image.
-- `GET /api/spotify/analyze` – Requires Spotify-authenticated session. Fetches top artists and recent plays, then calls OpenAI to produce song recommendations informed by image features.
-- `GET /api/spotify/recently-played` / `GET /api/spotify/top-artists` – Proxy routes to Spotify Web API for the signed-in user. 
+- `POST /api/generate-recommendations` – Requires a Spotify-authenticated session. Blends extracted image objects, recently played tracks, and top artists, then calls Groq to return a mood line plus 10 song picks.
+- `GET /api/spotify/recently-played` / `GET /api/spotify/top-artists` – Proxy routes to Spotify Web API for the signed-in user.
 
 ## Notes
 - HEIC uploads rely on browser support for `createImageBitmap` (Safari). Non-supporting browsers will show a friendly error after attempting conversion.
-- The chat panel currently uses placeholder song data until wired to backend recommendations; it still displays the latest suggested track with album art and optional preview audio.
-- Ensure the `HF_TOKEN` is valid; the vision and LLM endpoints use the Hugging Face router domain (`hf-inference`).
+- Groq requests require a valid `GROK_KEY`; check server logs for 401 responses when the Spotify session is missing.
+- Hugging Face endpoints use the router domain (`hf-inference`) and may return partial data while models warm up.
