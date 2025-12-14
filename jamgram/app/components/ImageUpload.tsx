@@ -1,18 +1,19 @@
 "use client";
 
 import { useState, DragEvent, ChangeEvent } from "react";
-// Added: import extractTags util
-import { extractTags } from "../utils/extractTags"; 
+import { extractTags } from "../utils/extractTags";
 
-export default function ImageUpload() {
+export type ImageUploadProps = {
+  onObjectsExtracted?: (objects: string[]) => void;
+};
+
+export default function ImageUpload({ onObjectsExtracted }: ImageUploadProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
-  // Added: state for analyzing/loading
   const [isAnalyzing, setIsAnalyzing] = useState(false); 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  // Added: state to store extracted tags/colors/mood
   const [tagsData, setTagsData] = useState<any>(null); 
 
   const revokePreviewUrl = () => {
@@ -78,10 +79,10 @@ export default function ImageUpload() {
   const handleFileUpload = async (file: File) => {
     setSelectedImage(file);
     setErrorMessage(null);
-    // Reset previous tags when new file uploaded
+    // reset previous tags when new file uploaded
     setTagsData(null); 
 
-    let fileToSend: File = file; // Added: to handle HEIC converted file
+    let fileToSend: File = file; // to handle HEIC converted file
 
     if (isHeicFile(file)) {
       setIsConverting(true);
@@ -89,7 +90,6 @@ export default function ImageUpload() {
         const previewBlob = await convertHeicToJpeg(file);
         updatePreviewUrl(previewBlob);
 
-        // Use converted blob as File to send to backend
         fileToSend = new File([previewBlob], file.name, { type: "image/jpeg" }); 
       } catch (conversionError) {
         console.error("Failed to convert HEIC image", conversionError);
@@ -104,11 +104,14 @@ export default function ImageUpload() {
       updatePreviewUrl(file);
     }
 
-    // Added: call backend to extract tags/colors/mood
+    // call backend to extract tags/colors/mood
     try {
       setIsAnalyzing(true);
       const tags = await extractTags(fileToSend);
       setTagsData(tags);
+      if (onObjectsExtracted && tags.objects) {
+        onObjectsExtracted(tags.objects);
+      }
     } catch (err: any) {
       setErrorMessage(err.message || "Failed to analyze image");
     } finally {
@@ -141,7 +144,7 @@ export default function ImageUpload() {
     revokePreviewUrl();
     setErrorMessage(null);
     setIsConverting(false);
-    // Clear extracted tags when removing image
+    // clear extracted tags when removing image
     setTagsData(null); 
   };
 
@@ -203,15 +206,13 @@ export default function ImageUpload() {
         )}
       </div>
 
-      {/* Added: show analyzing/loading state */}
+      {/* show analyzing/loading state */}
       {isAnalyzing && <p className="text-sm text-purple-100">Analyzing image…</p>}
 
-      {/* Added: show extracted tags/colors/mood */}
+      {/* show extracted tags */}
       {tagsData && (
         <div className="mt-4 p-4 rounded-xl bg-purple-800/30 text-white text-left w-full">
-          <p><strong>Objects:</strong> {tagsData.objects?.join(", ") || "None"}</p>
-          <p><strong>Colors:</strong> {tagsData.colors?.join(", ") || "None"}</p>
-          <p><strong>Mood:</strong> {tagsData.mood || "Unknown"}</p>
+          <p><strong>Objects detected:</strong> {tagsData.objects?.join(", ") || "None"}</p>
         </div>
       )}
 

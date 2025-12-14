@@ -36,7 +36,7 @@ export async function GET(req) {
 
   // send image data -- update this based on image stuff
   const { imageBase64 } = await req.json();
-  const imageFeatures = await callImageLLM(imageBase64); // change callImageLLM
+  const imageFeatures = await callImageLLM(imageBase64);
 
   // prompt to llm
   const prompt = `
