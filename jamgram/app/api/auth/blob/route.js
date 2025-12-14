@@ -25,9 +25,9 @@ export async function POST(request) {
 
   // return metadata
   return NextResponse.json({
-    url: blob.url,            // publicly accessible URL of the file
-    pathname: blob.pathname,  // path in Blob storage
-    size: blob.size,          // file size (bytes)
-    uploadedAt: new Date(),   // timestamp of upload
+    url: blob.url,         
+    pathname: blob.pathname,  
+    size: blob.size,         
+    uploadedAt: new Date(), 
   });
 }

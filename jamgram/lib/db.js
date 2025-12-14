@@ -68,7 +68,6 @@ export async function getRecentTracks(userId) {
 // DATABASE INITIALIZATION
 
 export async function initializeDatabase() {
-  // Create users table
   await sql`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -80,7 +79,6 @@ export async function initializeDatabase() {
     );
   `;
 
-  // Create spotify_top_artists table
   await sql`
     CREATE TABLE IF NOT EXISTS spotify_top_artists (
       id SERIAL PRIMARY KEY,
@@ -90,7 +88,6 @@ export async function initializeDatabase() {
     );
   `;
 
-  // Create spotify_recent_tracks table
   await sql`
     CREATE TABLE IF NOT EXISTS spotify_recent_tracks (
       id SERIAL PRIMARY KEY,
@@ -100,7 +97,6 @@ export async function initializeDatabase() {
     );
   `;
 
-  // Create indexes
   await sql`CREATE INDEX IF NOT EXISTS idx_user_spotify ON users(spotify_id);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_top_artists_user ON spotify_top_artists(user_id);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_recent_tracks_user ON spotify_recent_tracks(user_id);`;

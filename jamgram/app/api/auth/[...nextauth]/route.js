@@ -1,18 +1,17 @@
-// import the core NextAuth.js library & the Spotify authentication provider from NextAuth
+// import nextAuth.js library & the spotify authentication from NextAuth
 import NextAuth from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 
-// Configuration object that defines how NextAuth should behave
 export const authOptions = {
-  // define which login providers to support
+  // define the providers we use
   providers: [
     SpotifyProvider({
       clientId: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 
-      // define the scopes we request from Spotify
+      // define the scopes we request from spotify
       authorization:
-        "https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private,user-top-read,user-library-read,playlist-read-private",
+        "https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private,user-top-read,user-library-read,playlist-read-private,user-read-recently-played",
     }),
   ],
 

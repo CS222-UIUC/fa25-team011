@@ -1,9 +1,3 @@
-/*
- * A client-specific header component that's dynamic. It shows a "Connect Spotify" 
- * button when the user is not logged in and the user's name + "Sign out" button
- * when logged in.
- */
-
 
 "use client"; // shivi 10/17: needed for useSession hook
 

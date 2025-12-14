@@ -31,7 +31,7 @@ const eslintConfig = [
         },
         {
           selector: 'function',
-          format: ['camelCase', 'PascalCase'], // PascalCase for React components
+          format: ['camelCase', 'PascalCase'], 
         },
         {
           selector: 'parameter',
@@ -44,7 +44,6 @@ const eslintConfig = [
         },
       ],
       
-      // avoid unused variables (helps catch bugs)
       '@typescript-eslint/no-unused-vars': ['warn', { 
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
@@ -54,7 +53,6 @@ const eslintConfig = [
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
     rules: {
-      // test files to be less strict
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },

@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom'
 
-// Mock Next.js navigation
 jest.mock('next/navigation', () => ({
   useRouter() {
     return {
@@ -18,7 +17,7 @@ jest.mock('next/navigation', () => ({
   },
 }))
 
-// Mock Next.js Image component
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props) => {

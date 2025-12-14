@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import RecommendedSongCard from "./RecommendedSongCard"; // import the component
+import RecommendedSongCard from "./RecommendedSongCard";
 
 export type ChatPanelProps = {
   onSend?: (
@@ -11,6 +11,7 @@ export type ChatPanelProps = {
   isConnected?: boolean;
   imageId?: string;
   currentSongId?: string; // add current recommended song reference
+  objects?: string[]; // extracted objects from image
 };
 
 type Message = {
@@ -31,6 +32,7 @@ export default function ChatPanel({
   isConnected = true,
   imageId,
   currentSongId,
+  objects = [],
 }: ChatPanelProps) {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -38,7 +40,6 @@ export default function ChatPanel({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const chatLogRef = useRef<HTMLDivElement | null>(null);
 
-  // auto-scroll to latest
   useEffect(() => {
     chatLogRef.current?.scrollTo({
       top: chatLogRef.current.scrollHeight,
@@ -57,14 +58,12 @@ export default function ChatPanel({
     adjustTextareaHeight();
   }, [inputValue]);
 
-  // Whenever currentSongId updates, fetch song details (example hardcoded for now)
   useEffect(() => {
     if (!currentSongId) {
       setCurrentSong(null);
       return;
     }
 
-    // TODO: Replace with Spotify API fetch
     const song: Song = {
       id: currentSongId,
       title: "Sample Song",
@@ -74,6 +73,18 @@ export default function ChatPanel({
     };
     setCurrentSong(song);
   }, [currentSongId]);
+
+  // initial prompt message
+  useEffect(() => {
+    if (objects && objects.length > 0 && messages.length === 0) {
+      setMessages([
+        {
+          role: "assistant",
+          content: "I detected some objects in your image. Would you like me to generate song recommendations based on the vibe? Type YES to proceed!",
+        },
+      ]);
+    }
+  }, [objects, messages.length]);
 
   const handleSend = async () => {
     const trimmed = inputValue.trim();
@@ -86,7 +97,16 @@ export default function ChatPanel({
     try {
       const response = await onSend?.(trimmed, { imageId, currentSongId });
       if (response) {
-        setMessages((prev) => [...prev, { role: "assistant", content: response }]);
+        if (typeof response === "object" && (response.mood || response.songs)) {
+          if (response.mood) {
+            setMessages((prev) => [...prev, { role: "assistant", content: response.mood }]);
+          }
+          if (response.songs) {
+            setMessages((prev) => [...prev, { role: "assistant", content: response.songs }]);
+          }
+        } else {
+          setMessages((prev) => [...prev, { role: "assistant", content: String(response) }]);
+        }
       }
     } catch (error) {
       console.error("Chat send error", error);
@@ -137,7 +157,7 @@ export default function ChatPanel({
                         : "bg-white/10 text-purple-100"
                     }`}
                   >
-                    {m.content}
+                    <div className="whitespace-pre-wrap">{m.content}</div>
                   </div>
                 </div>
               ))}

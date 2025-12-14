@@ -12,10 +12,9 @@ export const extractTags = async (file: File) => {
     
     if (!res.ok) {
       console.error("Full API error response:", data);
-      // If we have partial results (objects/caption), return them
       if (data.objects || data.caption) {
         console.log("Got partial results:", data);
-        return data; // Return partial results instead of throwing
+        return data; 
       }
       throw new Error(data.error || data.details || "Failed to extract tags");
     }
